@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour
     public int score;
     public int enemiesAlive;
     public int totalEnemies;
+    
+
 
     void Start()
     {

@@ -4,15 +4,32 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public float health;
+    public int speed;
+    public int damage;
+    public int collisionDamage;
+
+    private void OnCollisionEnter(Collision collision)
     {
-        
+        if (gameObject.CompareTag("bullet"))
+        {
+            BulletHit();
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    void BulletHit()
     {
-        
+        health -= GetComponent<Player>().damage;
+
+        if(health<=0)
+        {
+            OnDeath();
+        }
+    }
+
+    void OnDeath()
+    {
+        GetComponent<GameManager>().enemiesAlive--;
+
     }
 }
