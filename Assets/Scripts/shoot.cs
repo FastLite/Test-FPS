@@ -23,14 +23,22 @@ public class shoot : MonoBehaviour
 
     void Update()
     {
-        
+        OnFire();
 
 
+
+
+    }
+
+
+    void OnFire()
+    {
         if (Input.GetButtonDown("Fire1"))
         {
             GameObject go = Instantiate(bulletPref, spawnPoint.transform.position, Quaternion.identity);
+            go.transform.parent = null;
             go.GetComponent<Rigidbody>().AddForce(-transform.forward * launchForce, ForceMode.Impulse);
-            Debug.Log(bulletRotation.transform.rotation.y + "+" + Mathf.Rad2Deg * bulletRotation.transform.rotation.y);
+            //Debug.Log(bulletRotation.transform.rotation.y + "+" + Mathf.Rad2Deg * bulletRotation.transform.rotation.y);
         }
     }
 }

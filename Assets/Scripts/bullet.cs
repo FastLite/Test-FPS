@@ -4,15 +4,14 @@ using UnityEngine;
 
 public class bullet : MonoBehaviour
 {
-    
-    void Start()
+    private void Start()
     {
-        
+        Destroy(gameObject, 5);
     }
 
-
-    void Update()
+    private void OnCollisionEnter(Collision collision)
     {
         
+        Destroy(gameObject);
     }
 }

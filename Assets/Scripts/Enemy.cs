@@ -5,23 +5,32 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     public float health;
+    public float maxHealth;
     public int speed;
     public int damage;
     public int collisionDamage;
+    Player pl;
+    
 
+    private void Start()
+    {
+        pl = GameObject.FindObjectOfType<Player>();
+        health = maxHealth;
+    }
     private void OnCollisionEnter(Collision collision)
     {
-        if (gameObject.CompareTag("bullet"))
+        if (collision.gameObject.CompareTag("bullet"))
         {
+            Debug.Log("коллизия есть");
             BulletHit();
         }
     }
 
     void BulletHit()
     {
-        health -= GetComponent<Player>().damage;
-
-        if(health<=0)
+        health -= pl.damage;
+        Debug.Log("текущее здоровье:" + health);
+        if (health<=0)
         {
             OnDeath();
         }
@@ -29,7 +38,9 @@ public class Enemy : MonoBehaviour
 
     void OnDeath()
     {
-        GetComponent<GameManager>().enemiesAlive--;
+
+        GameObject.FindObjectOfType < GameManager > ().enemiesAlive--;
 
     }
+
 }
