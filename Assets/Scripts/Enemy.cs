@@ -17,9 +17,9 @@ public class Enemy : MonoBehaviour
         pl = GameObject.FindObjectOfType<Player>();
         health = maxHealth;
     }
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("bullet"))
+        if (other.gameObject.CompareTag("bullet"))
         {
             Debug.Log("коллизия есть");
             BulletHit();
@@ -38,7 +38,7 @@ public class Enemy : MonoBehaviour
 
     void OnDeath()
     {
-
+        Destroy(gameObject);
         GameObject.FindObjectOfType < GameManager > ().enemiesAlive--;
 
     }
