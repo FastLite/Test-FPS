@@ -4,11 +4,15 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    public float health;
-    public float maxHealth;
-    public int speed;
+    [Header("Stats")]
+
+    public int health;
+    public int maxHealth;
+    public float speed;
     public int damage;
     public int collisionDamage;
+
+
     Player pl;
     
 
@@ -22,12 +26,13 @@ public class Enemy : MonoBehaviour
         if (other.gameObject.CompareTag("bullet"))
         {
             Debug.Log("коллизия есть");
-            BulletHit();
+            BulletHit(other);
         }
     }
 
-    void BulletHit()
+    void BulletHit(Collider collided)
     {
+        Destroy(collided.gameObject);
         health -= pl.damage;
         Debug.Log("текущее здоровье:" + health);
         if (health<=0)

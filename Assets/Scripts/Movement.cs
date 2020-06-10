@@ -4,44 +4,52 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    public float Speed;
     public float Sensativity;
-    public float jumpForce;
-
     private float yaw = 0.0f;
     private float pitch = 0.0f;
 
+    public float walkSpeed = 6.0F;
+    public float jumpSpeed = 8.0F;
+    public float runSpeed = 8.0F;
+    public float gravity = 20.0F;
 
-    public Rigidbody rigid;
-
+    private Vector3 moveDirection = Vector3.zero;
+    private CharacterController controller;
     void Start()
     {
-         rigid = GetComponentInParent<Rigidbody>();
+         
+        controller = GetComponentInParent<CharacterController>();
+
     }
 
     void Update()
     {
         CameraRotation();
-        Jump();
+        Move();
     }
 
     void CameraRotation()
     {
         yaw += Sensativity * Input.GetAxis("Mouse X");
         pitch -= Sensativity * Input.GetAxis("Mouse Y");
+        pitch = Mathf.Clamp(pitch, -80, 100);
 
-        transform.eulerAngles = new Vector3(pitch, yaw, 0.0f);
+        transform.rotation = Quaternion.Euler(pitch, yaw, 0.0f);
     }
-    void Jump()
+    void Move()
     {
-
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (controller.isGrounded)
         {
-            rigid.AddForce( 0,jumpForce, 0, ForceMode.Impulse);
-            Debug.Log("игрок должен был прыгнуть");
-
-
+            
+            if (Input.GetButton("Jump"))
+                moveDirection.y = jumpSpeed;
         }
+
+        moveDirection.y -= gravity * Time.deltaTime;
+        moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        moveDirection = transform.TransformDirection(moveDirection);
+        moveDirection *= walkSpeed;
+        controller.Move(moveDirection * Time.deltaTime);
     }
+    
 }
