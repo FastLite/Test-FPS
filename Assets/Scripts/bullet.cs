@@ -6,12 +6,8 @@ public class bullet : MonoBehaviour
 {
     private void Start()
     {
-        Destroy(gameObject, 5);
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        
-        Destroy(gameObject);
+        Destroy(gameObject, 3);
     }
 }
+
+

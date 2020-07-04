@@ -13,6 +13,15 @@ public class Enemy : MonoBehaviour
     public int collisionDamage;
 
 
+    public AudioClip shootSound;
+    public AudioClip reloadingSound;
+
+    public AudioClip hitSound;
+    public AudioClip DeathSound;
+
+    public AudioSource sourceOfAudioEnemy;
+    public AudioSource sourceOfAudioPlayer;
+
     Player pl;
     
 
@@ -20,6 +29,10 @@ public class Enemy : MonoBehaviour
     {
         pl = GameObject.FindObjectOfType<Player>();
         health = maxHealth;
+
+        sourceOfAudioEnemy = gameObject.GetComponent<AudioSource>();
+        sourceOfAudioPlayer = GameObject.FindObjectOfType<Player>().GetComponent<AudioSource>();
+
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -35,10 +48,14 @@ public class Enemy : MonoBehaviour
         Destroy(collided.gameObject);
         health -= pl.damage;
         Debug.Log("текущее здоровье:" + health);
-        if (health<=0)
+        if (health <= 0)
         {
             OnDeath();
+            sourceOfAudioPlayer.PlayOneShot(DeathSound);
+
         }
+        else
+            sourceOfAudioPlayer.PlayOneShot(hitSound);
     }
 
     void OnDeath()
