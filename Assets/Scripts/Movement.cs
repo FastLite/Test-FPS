@@ -18,12 +18,17 @@ public class Movement : MonoBehaviour
     public float capsuleHeightCrouching = 0.9f;
     [Tooltip("Speed of crouching transitions")]
     public float crouchingSharpness = 10f;
+    [Tooltip("Sharpness for the movement when grounded, a low value will make the player accelerate and decelerate slowly, a high value will do the opposite")]
+    public float movementSharpnessOnGround = 15;
+    [Tooltip("Acceleration speed when in the air")]
+    public float accelerationSpeedInAir = 25f;
     
     public UnityAction<bool> onStanceChanged;
     
     public float chrouchSpeedModifier = 0.75f;
 
-
+    public Vector3 characterVelocity;
+    
     public float defaultSpeed = 7.5f;
     public float gravity = 20.0f;
     public bool isCrouched = false;
@@ -34,8 +39,8 @@ public class Movement : MonoBehaviour
     Vector3 moveDirection = Vector3.zero;
     public Camera playerCamera;
     Vector2 rotation = Vector2.zero;
-    public float sprintModifier = 1.55f;
-    public float crouchModifier = 0.75f;
+    public float sprintSpeedModifier = 1.55f;
+    public float crouchSpeedModifier = 0.75f;
 
     public float standardCamHeight;
     public float walkSpeed = 7.5f;
@@ -44,6 +49,9 @@ public class Movement : MonoBehaviour
     
     PlayerInputHandler m_InputHandler;
     Actor m_Actor;
+    private Vector3 m_LatestImpactSpeed;
+
+
     void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -56,11 +64,21 @@ public class Movement : MonoBehaviour
         
 
         SetCrouchingState(false, true);
+        
         UpdateCharacterHeight(true);
     }
 
     void Update()
     {
+        
+        
+        if (m_InputHandler.GetCrouchInputDown())
+        {
+            
+            SetCrouchingState(!isCrouched, false);
+            
+        }
+        UpdateCharacterHeight(false);
         HandleCharacterMovement();
     }
 
@@ -72,44 +90,72 @@ public class Movement : MonoBehaviour
         {
             isSprinting = SetCrouchingState(false, false);
         }
-        float speedModifier = isSprinting ? sprintModifier : 1f;
+        float speedModifier = isSprinting ? sprintSpeedModifier : 1f;
 
         if (isSprinting && m_InputHandler.GetCrouchInputDown())
         {
             isSliding = true;
             
         }
-
+        
+        Vector3 worldspaceMoveInput = transform.TransformVector(m_InputHandler.GetMoveInput());
 
         if (characterController.isGrounded)
         {
-            Vector3 forward = transform.TransformDirection(Vector3.forward);
-            Vector3 right = transform.TransformDirection(Vector3.right);
-            float curSpeedX = canMove ? walkSpeed * speedModifier * Input.GetAxis("Vertical") : 0;
-            float curSpeedY = canMove ? walkSpeed* speedModifier * Input.GetAxis("Horizontal") : 0;
+            Vector3 targetVelocity = worldspaceMoveInput * walkSpeed * speedModifier;
+            // reduce speed if crouching by crouch speed ratio
+            if (isCrouched)
+                targetVelocity *= crouchSpeedModifier;
+            targetVelocity = GetDirectionReorientedOnSlope(targetVelocity.normalized, transform.up) * targetVelocity.magnitude;
 
-            moveDirection.x = Input.GetAxis("Horizontal") * walkSpeed;
-            moveDirection.z = Input.GetAxis("Vertical") * walkSpeed;
-            moveDirection = transform.TransformDirection(moveDirection);
+            // smoothly interpolate between our current velocity and the target velocity based on acceleration speed
+            characterVelocity = Vector3.Lerp(characterVelocity, targetVelocity, movementSharpnessOnGround * Time.deltaTime);
 
 
-            if (Input.GetButton("Jump"))
+
+            if ( m_InputHandler.GetJumpInputDown())
             {
-                moveDirection.y = jumpSpeed;
+                if (SetCrouchingState(false, false))
+                {
+                    // start by canceling out the vertical component of our velocity
+                    characterVelocity = new Vector3(characterVelocity.x, 0f, characterVelocity.z);
+
+                    // then, add the jumpSpeed value upwards
+                    characterVelocity += Vector3.up * jumpSpeed;
+                  
+                }
             }
         }
-        else if (!characterController.isGrounded) // Here I independently allow for both X and Z movement. 
+        else 
 
         {
-            moveDirection.x = Input.GetAxis("Horizontal") * walkSpeed* speedModifier;
-            moveDirection.z = Input.GetAxis("Vertical") * walkSpeed* speedModifier;
-            moveDirection =
-                transform.TransformDirection(moveDirection); // Then reassign the current transform to the Vector 3.
+            characterVelocity += worldspaceMoveInput * (accelerationSpeedInAir * Time.deltaTime);
+
+            // limit air speed to a maximum, but only horizontally
+            float verticalVelocity = characterVelocity.y;
+            Vector3 horizontalVelocity = Vector3.ProjectOnPlane(characterVelocity, Vector3.up);
+            horizontalVelocity = Vector3.ClampMagnitude(horizontalVelocity, walkSpeed * speedModifier);
+            characterVelocity = horizontalVelocity + (Vector3.up * verticalVelocity);
+
+            // apply the gravity to the velocity
+            characterVelocity += Vector3.down * gravity * Time.deltaTime;
         }
 
-        moveDirection.y -= gravity * Time.deltaTime;
+       
+        characterController.Move(characterVelocity * Time.deltaTime);
 
-        characterController.Move(moveDirection * Time.deltaTime);
+        Vector3 capsuleBottomBeforeMove = GetCapsuleBottomHemisphere();
+        Vector3 capsuleTopBeforeMove = GetCapsuleTopHemisphere(characterController.height);
+        characterController.Move(characterVelocity * Time.deltaTime);
+
+        m_LatestImpactSpeed = Vector3.zero;
+        if (Physics.CapsuleCast(capsuleBottomBeforeMove, capsuleTopBeforeMove, characterController.radius, characterVelocity.normalized, out RaycastHit hit, characterVelocity.magnitude * Time.deltaTime, -1, QueryTriggerInteraction.Ignore))
+        {
+            // We remember the last impact speed because the fall damage logic might need it
+            m_LatestImpactSpeed = characterVelocity;
+
+            characterVelocity = Vector3.ProjectOnPlane(characterVelocity, hit.normal);
+        }
 
         if (canMove)
         {
@@ -118,6 +164,8 @@ public class Movement : MonoBehaviour
             rotation.x = Mathf.Clamp(rotation.x, -lookXLimit, lookXLimit);
             playerCamera.transform.localRotation = Quaternion.Euler(rotation.x, 0, 0);
             transform.eulerAngles = new Vector2(0, rotation.y);
+            
+            
         }
     }
 
@@ -178,7 +226,7 @@ public class Movement : MonoBehaviour
                     QueryTriggerInteraction.Ignore);
                 foreach (Collider c in standingOverlaps)
                 {
-                    if (c != characterController)
+                    if (c != characterController && !c.CompareTag("weapon"))
                     {
                         return false;
                     }
@@ -190,11 +238,19 @@ public class Movement : MonoBehaviour
 
         if (onStanceChanged != null)
         {
+            Debug.Log("Chrouch on stance" + crouched );
             onStanceChanged.Invoke(crouched);
         }
 
         isCrouched = crouched;
+        Debug.Log("Chrouch " + isCrouched );
         return true;
+        
+    }
+    public Vector3 GetDirectionReorientedOnSlope(Vector3 direction, Vector3 slopeNormal)
+    {
+        Vector3 directionRight = Vector3.Cross(direction, transform.up);
+        return Vector3.Cross(slopeNormal, directionRight).normalized;
     }
     
 }

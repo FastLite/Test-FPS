@@ -402,18 +402,21 @@ MonoBehaviour:
   capsuleHeightStanding: 1.8
   capsuleHeightCrouching: 0.9
   crouchingSharpness: 10
+  movementSharpnessOnGround: 15
+  accelerationSpeedInAir: 25
   chrouchSpeedModifier: 0.75
+  characterVelocity: {x: 0, y: 0, z: 0}
   defaultSpeed: 7.5
   gravity: 20
   isCrouched: 0
   isSliding: 0
-  jumpSpeed: 10
+  jumpSpeed: 8
   lookSpeed: 2
   lookXLimit: 45
   playerCamera: {fileID: 611301763}
-  sprintModifier: 1.75
-  crouchModifier: 0.75
-  standardCamHeight: 0.611
+  sprintSpeedModifier: 1.55
+  crouchSpeedModifier: 0.75
+  standardCamHeight: 0
   walkSpeed: 7.5
 --- !u!4 &810465962
 Transform:

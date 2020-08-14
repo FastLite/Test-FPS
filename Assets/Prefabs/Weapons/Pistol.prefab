@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5425246047562804867}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: BulletSPwn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40,9 +40,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1209963819393754616}
   - component: {fileID: 701496537869688272}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Pistol
-  m_TagString: Untagged
+  m_TagString: weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -94,9 +94,9 @@ GameObject:
   - component: {fileID: 1288690904381760613}
   - component: {fileID: 4984792981638695700}
   - component: {fileID: 7368539954004295725}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -188,9 +188,9 @@ GameObject:
   - component: {fileID: 4061888968624048640}
   - component: {fileID: 8884264340100818420}
   - component: {fileID: 9196909565118534523}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
