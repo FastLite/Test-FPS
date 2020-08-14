@@ -24,6 +24,8 @@ public class Player : MonoBehaviour
     public Weapon currentWeapon;
 
     GameObject spawned;
+    public GameObject weaponRoot;
+    public bool isWeaponActive;
 
     void Start()
     {
@@ -78,5 +80,13 @@ public class Player : MonoBehaviour
         shScri = GameObject.FindObjectOfType<shoot>();
 
         gm.shScriGM = shScri;
+    }
+    public void ShowWeapon(bool show)
+    {
+        weaponRoot.SetActive(show);
+
+       
+
+        isWeaponActive = show;
     }
 }

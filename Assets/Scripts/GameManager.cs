@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
     public AudioClip secondLevelMusic;
     public AudioSource sourceOfAudio;
 
+    public bool isGameOver;
+
     void Start()
     {
         playerList = gameObject.GetComponent<WeaponFacric>().CreateDefaults();
