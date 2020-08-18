@@ -403,7 +403,7 @@ MonoBehaviour:
   capsuleHeightCrouching: 0.9
   crouchingSharpness: 10
   movementSharpnessOnGround: 15
-  accelerationSpeedInAir: 25
+  accelerationSpeedInAir: 250
   chrouchSpeedModifier: 0.75
   characterVelocity: {x: 0, y: 0, z: 0}
   defaultSpeed: 7.5

@@ -88,7 +88,11 @@ public class Movement : MonoBehaviour
 
         if (isSprinting)
         {
-            isSprinting = SetCrouchingState(false, false);
+            if (isCrouched)
+            {
+                isSprinting = SetCrouchingState(false, false);
+            }
+            
         }
         float speedModifier = isSprinting ? sprintSpeedModifier : 1f;
 
@@ -115,15 +119,17 @@ public class Movement : MonoBehaviour
 
             if ( m_InputHandler.GetJumpInputDown())
             {
-                if (SetCrouchingState(false, false))
+                if (isCrouched)
                 {
-                    // start by canceling out the vertical component of our velocity
-                    characterVelocity = new Vector3(characterVelocity.x, 0f, characterVelocity.z);
-
-                    // then, add the jumpSpeed value upwards
-                    characterVelocity += Vector3.up * jumpSpeed;
+                    SetCrouchingState(false, false);
                   
                 }
+                
+                // start by canceling out the vertical component of our velocity
+                characterVelocity = new Vector3(characterVelocity.x, 0f, characterVelocity.z);
+
+                // then, add the jumpSpeed value upwards
+                characterVelocity += Vector3.up * jumpSpeed;
             }
         }
         else 
