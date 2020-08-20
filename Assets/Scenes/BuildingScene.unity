@@ -398,26 +398,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canMove: 1
-  cameraHeightRatio: 0.9
-  capsuleHeightStanding: 1.8
+  cameraHeightRatio: 1
+  capsuleHeightStanding: 1.9
   capsuleHeightCrouching: 0.9
+  capsuleHeightsliding: 0.9
   crouchingSharpness: 10
-  movementSharpnessOnGround: 15
-  accelerationSpeedInAir: 250
-  chrouchSpeedModifier: 0.75
+  movementSharpnessOnGround: 10
+  accelerationSpeedInAir: 100
   characterVelocity: {x: 0, y: 0, z: 0}
-  defaultSpeed: 7.5
+  defaultSpeed: 5
   gravity: 20
   isCrouched: 0
   isSliding: 0
-  jumpSpeed: 8
-  lookSpeed: 2
+  jumpSpeed: 6
+  lookSpeed: 1
   lookXLimit: 45
   playerCamera: {fileID: 611301763}
   sprintSpeedModifier: 1.55
   crouchSpeedModifier: 0.75
+  slidingSpeedModifier: 2.5
   standardCamHeight: 0
   walkSpeed: 7.5
+  slideTimerMax: 2.5
 --- !u!4 &810465962
 Transform:
   m_ObjectHideFlags: 0
@@ -504,7 +506,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &912862124
 Transform:
   m_ObjectHideFlags: 0
@@ -1361,6 +1363,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1495423584211050198, guid: 24109a41bf228c0459b49e51e4ab78b1,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.1
       objectReference: {fileID: 0}
     - target: {fileID: 7907005525511562782, guid: 24109a41bf228c0459b49e51e4ab78b1,
         type: 3}

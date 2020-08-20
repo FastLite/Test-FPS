@@ -16,6 +16,8 @@ public class Movement : MonoBehaviour
     public float capsuleHeightStanding = 1.8f;
     [Tooltip("Height of character when crouching")]
     public float capsuleHeightCrouching = 0.9f;
+    [Tooltip("Height of character when sliding")]
+    public float capsuleHeightsliding = 0.9f;
     [Tooltip("Speed of crouching transitions")]
     public float crouchingSharpness = 10f;
     [Tooltip("Sharpness for the movement when grounded, a low value will make the player accelerate and decelerate slowly, a high value will do the opposite")]
@@ -25,7 +27,6 @@ public class Movement : MonoBehaviour
     
     public UnityAction<bool> onStanceChanged;
     
-    public float chrouchSpeedModifier = 0.75f;
 
     public Vector3 characterVelocity;
     
@@ -36,11 +37,11 @@ public class Movement : MonoBehaviour
     public float jumpSpeed = 8.0f;
     public float lookSpeed = 2.0f;
     public float lookXLimit = 45.0f;
-    Vector3 moveDirection = Vector3.zero;
     public Camera playerCamera;
     Vector2 rotation = Vector2.zero;
     public float sprintSpeedModifier = 1.55f;
     public float crouchSpeedModifier = 0.75f;
+    public float slidingSpeedModifier = 1.75f;
 
     public float standardCamHeight;
     public float walkSpeed = 7.5f;
@@ -49,7 +50,11 @@ public class Movement : MonoBehaviour
     
     PlayerInputHandler m_InputHandler;
     Actor m_Actor;
-    private Vector3 m_LatestImpactSpeed;
+
+
+    private Vector3 slideForward;  // direction of slide
+    private float slideTimer  = 0.0f;
+    public float slideTimerMax   =  2.5f; // time while sliding
 
 
     void Start()
@@ -83,7 +88,8 @@ public class Movement : MonoBehaviour
     }
 
     void HandleCharacterMovement()
-    {
+    { 
+        
         bool isSprinting = m_InputHandler.GetSprintInputHeld();
 
         if (isSprinting)
@@ -94,19 +100,45 @@ public class Movement : MonoBehaviour
             }
             
         }
-        float speedModifier = isSprinting ? sprintSpeedModifier : 1f;
-
-        if (isSprinting && m_InputHandler.GetCrouchInputDown())
+        if ( isSprinting && m_InputHandler.GetCrouchInputDown() && !isSliding) 
         {
+            slideTimer = 0; // start timer
             isSliding = true;
+            movementSharpnessOnGround /= 2;
+        }
+        if (isSliding)
+        {
+            m_TargetCharacterHeight = capsuleHeightsliding;
+            
+            
+            slideTimer += Time.deltaTime;
+            if (slideTimer > slideTimerMax) 
+            {
+                isSliding = false;
+                m_TargetCharacterHeight = capsuleHeightStanding;
+                movementSharpnessOnGround *= 2.5f;
+            }
             
         }
+
+        float speedModifier;
+        if (isSprinting)
+            speedModifier = sprintSpeedModifier;
+            
+        else if (isSliding)
+            speedModifier = slidingSpeedModifier;
+        else
+        {
+            speedModifier = 1;
+        }
+
+        
         
         Vector3 worldspaceMoveInput = transform.TransformVector(m_InputHandler.GetMoveInput());
 
         if (characterController.isGrounded)
         {
-            Vector3 targetVelocity = worldspaceMoveInput * walkSpeed * speedModifier;
+            Vector3 targetVelocity = worldspaceMoveInput * (walkSpeed * speedModifier);
             // reduce speed if crouching by crouch speed ratio
             if (isCrouched)
                 targetVelocity *= crouchSpeedModifier;
@@ -123,6 +155,13 @@ public class Movement : MonoBehaviour
                 {
                     SetCrouchingState(false, false);
                   
+                }
+
+                if ( isSliding)
+                {isSliding = false;
+                    m_TargetCharacterHeight = capsuleHeightStanding;
+                    isSliding = false;
+                    movementSharpnessOnGround *= 2.5f;
                 }
                 
                 // start by canceling out the vertical component of our velocity
@@ -144,7 +183,7 @@ public class Movement : MonoBehaviour
             characterVelocity = horizontalVelocity + (Vector3.up * verticalVelocity);
 
             // apply the gravity to the velocity
-            characterVelocity += Vector3.down * gravity * Time.deltaTime;
+            characterVelocity += Vector3.down * (gravity * Time.deltaTime);
         }
 
        
@@ -154,11 +193,11 @@ public class Movement : MonoBehaviour
         Vector3 capsuleTopBeforeMove = GetCapsuleTopHemisphere(characterController.height);
         characterController.Move(characterVelocity * Time.deltaTime);
 
-        m_LatestImpactSpeed = Vector3.zero;
+       
         if (Physics.CapsuleCast(capsuleBottomBeforeMove, capsuleTopBeforeMove, characterController.radius, characterVelocity.normalized, out RaycastHit hit, characterVelocity.magnitude * Time.deltaTime, -1, QueryTriggerInteraction.Ignore))
         {
             // We remember the last impact speed because the fall damage logic might need it
-            m_LatestImpactSpeed = characterVelocity;
+            
 
             characterVelocity = Vector3.ProjectOnPlane(characterVelocity, hit.normal);
         }
@@ -195,8 +234,8 @@ public class Movement : MonoBehaviour
         if (force)
         {
             characterController.height = m_TargetCharacterHeight;
-            characterController.center = Vector3.up * characterController.height * 0.5f;
-            playerCamera.transform.localPosition = Vector3.up * m_TargetCharacterHeight * cameraHeightRatio;
+            characterController.center = Vector3.up * (characterController.height * 0.5f);
+            playerCamera.transform.localPosition = Vector3.up * (m_TargetCharacterHeight * cameraHeightRatio);
             m_Actor.aimPoint.transform.localPosition = characterController.center;
         }
         // Update smooth height
@@ -205,9 +244,9 @@ public class Movement : MonoBehaviour
             // resize the capsule and adjust camera position
             characterController.height = Mathf.Lerp(characterController.height, m_TargetCharacterHeight,
                 crouchingSharpness * Time.deltaTime);
-            characterController.center = Vector3.up * characterController.height * 0.5f;
+            characterController.center = Vector3.up * (characterController.height * 0.5f);
             playerCamera.transform.localPosition = Vector3.Lerp(playerCamera.transform.localPosition,
-                Vector3.up * m_TargetCharacterHeight * cameraHeightRatio, crouchingSharpness * Time.deltaTime);
+                Vector3.up * (m_TargetCharacterHeight * cameraHeightRatio), crouchingSharpness * Time.deltaTime);
             m_Actor.aimPoint.transform.localPosition = characterController.center;
         }
     }
@@ -244,12 +283,10 @@ public class Movement : MonoBehaviour
 
         if (onStanceChanged != null)
         {
-            Debug.Log("Chrouch on stance" + crouched );
             onStanceChanged.Invoke(crouched);
         }
 
         isCrouched = crouched;
-        Debug.Log("Chrouch " + isCrouched );
         return true;
         
     }
