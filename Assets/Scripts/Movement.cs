@@ -17,7 +17,7 @@ public class Movement : MonoBehaviour
     [Tooltip("Height of character when crouching")]
     public float capsuleHeightCrouching = 0.9f;
     [Tooltip("Height of character when sliding")]
-    public float capsuleHeightsliding = 0.9f;
+    public float capsuleHeightSliding = 0.9f;
     [Tooltip("Speed of crouching transitions")]
     public float crouchingSharpness = 10f;
     [Tooltip("Sharpness for the movement when grounded, a low value will make the player accelerate and decelerate slowly, a high value will do the opposite")]
@@ -103,20 +103,22 @@ public class Movement : MonoBehaviour
         if ( isSprinting && m_InputHandler.GetCrouchInputDown() && !isSliding) 
         {
             slideTimer = 0; // start timer
-            isSliding = true;
-            movementSharpnessOnGround /= 2;
+            ChangeSlidingVariables();
         }
         if (isSliding)
         {
-            m_TargetCharacterHeight = capsuleHeightsliding;
+            
             
             
             slideTimer += Time.deltaTime;
             if (slideTimer > slideTimerMax) 
             {
-                isSliding = false;
-                m_TargetCharacterHeight = capsuleHeightStanding;
-                movementSharpnessOnGround *= 2.5f;
+                ReturnSlidingVariables();
+            }
+
+            if (m_InputHandler.GetSprintInputDown())
+            {
+                ReturnSlidingVariables();
             }
             
         }
@@ -158,10 +160,9 @@ public class Movement : MonoBehaviour
                 }
 
                 if ( isSliding)
-                {isSliding = false;
-                    m_TargetCharacterHeight = capsuleHeightStanding;
-                    isSliding = false;
-                    movementSharpnessOnGround *= 2.5f;
+                {
+                    
+                    ReturnSlidingVariables();
                 }
                 
                 // start by canceling out the vertical component of our velocity
@@ -286,7 +287,15 @@ public class Movement : MonoBehaviour
             onStanceChanged.Invoke(crouched);
         }
 
-        isCrouched = crouched;
+        if (!isSliding)
+        {
+            isCrouched = crouched;
+        }
+        else
+        {
+            ReturnSlidingVariables();
+        }
+        
         return true;
         
     }
@@ -295,5 +304,19 @@ public class Movement : MonoBehaviour
         Vector3 directionRight = Vector3.Cross(direction, transform.up);
         return Vector3.Cross(slopeNormal, directionRight).normalized;
     }
+
+    public void ChangeSlidingVariables()
+    {
+        m_TargetCharacterHeight = capsuleHeightSliding;
+        isSliding = true;
+        movementSharpnessOnGround -= 10f;
+    }
+    public void ReturnSlidingVariables()
+    {
+        m_TargetCharacterHeight = capsuleHeightStanding;
+        isSliding = false;
+        movementSharpnessOnGround += 10f;
+    }
+    
     
 }

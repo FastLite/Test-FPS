@@ -124,6 +124,15 @@ public class PlayerInputHandler : MonoBehaviour
 
         return false;
     }
+    public bool GetSprintInputDown()
+    {
+        if (CanProcessInput())
+        {
+            return Input.GetButtonDown(GameConstants.k_ButtonNameSprint);
+        }
+
+        return false;
+    }
 
     public bool GetCrouchInputDown()
     {

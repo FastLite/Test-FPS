@@ -401,7 +401,7 @@ MonoBehaviour:
   cameraHeightRatio: 1
   capsuleHeightStanding: 1.9
   capsuleHeightCrouching: 0.9
-  capsuleHeightsliding: 0.9
+  capsuleHeightSliding: 0.9
   crouchingSharpness: 10
   movementSharpnessOnGround: 10
   accelerationSpeedInAir: 100
@@ -411,7 +411,7 @@ MonoBehaviour:
   isCrouched: 0
   isSliding: 0
   jumpSpeed: 6
-  lookSpeed: 1
+  lookSpeed: 2
   lookXLimit: 45
   playerCamera: {fileID: 611301763}
   sprintSpeedModifier: 1.55
@@ -419,7 +419,7 @@ MonoBehaviour:
   slidingSpeedModifier: 2.5
   standardCamHeight: 0
   walkSpeed: 7.5
-  slideTimerMax: 2.5
+  slideTimerMax: 0.75
 --- !u!4 &810465962
 Transform:
   m_ObjectHideFlags: 0
